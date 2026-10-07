@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Sun Malaysia — Systems Desk</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: oklch(0.14 0.012 250);
+    --bg-2: oklch(0.17 0.015 250);
+    --card: oklch(0.195 0.016 252);
+    --line: oklch(1 0 0/.09);
+    --line-2: oklch(1 0 0/.15);
+    --ink: oklch(0.97 0.004 260);
+    --mut: oklch(0.66 0.02 252);
+    --mut-2: oklch(0.52 0.02 252);
+    --red: oklch(0.55 0.19 25);       /* newsprint red, echoes site's primary */
+    --ok: oklch(0.76 0.16 152);
+    --warn: oklch(0.80 0.15 78);
+    --down: oklch(0.66 0.21 25);
+    --info: oklch(0.70 0.10 250);
+  }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:var(--bg); color:var(--ink); }
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, oklch(0.55 0.19 25/.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, oklch(0.6 0.1 250/.08), transparent 55%),
+      var(--bg);
+  }
+  .mono{ font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace; }
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    border-bottom:1px solid var(--line);
+    background:var(--bg-2);
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(10px);
+  }
+  .masthead__inner{
+    max-width:1180px; margin:0 auto;
+    padding:18px clamp(16px,4vw,28px) 14px;
+  }
+  .masthead__row{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .masthead__eyebrow{
+    font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--red);
+  }
+  .masthead__title{
+    font-family:'Playfair Display',Georgia,serif;
+    font-weight:800; font-style:italic;
+    font-size:clamp(28px,4.4vw,42px);
+    letter-spacing:-.01em; line-height:1;
+    margin-top:4px;
+  }
+  .masthead__title em{ color:var(--red); font-style:italic; }
+  .masthead__meta{ display:flex; align-items:center; gap:10px; }
+  .masthead__stamp{
+    font-size:11px; color:var(--mut); text-align:right;
+  }
+  .masthead__stamp b{ color:var(--ink); font-weight:600; }
+  .btn{
+    appearance:none; border:1px solid var(--line-2); background:oklch(1 0 0/.04);
+    color:var(--ink); font:inherit; font-weight:700; font-size:12.5px;
+    letter-spacing:.02em; padding:9px 15px; border-radius:9px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px; transition:.15s;
+  }
+  .btn:hover{ background:oklch(1 0 0/.09); border-color:oklch(1 0 0/.28); }
+  .btn:active{ transform:translateY(1px); }
+  .btn[disabled]{ opacity:.5; pointer-events:none; }
+  .btn__spin{ width:11px; height:11px; border-radius:50%; border:2px solid oklch(1 0 0/.3); border-top-color:var(--ink); animation:spin .7s linear infinite; display:none; }
+  .btn.is-loading .btn__spin{ display:inline-block; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* summary pills */
+  .summary{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .pill{
+    display:flex; align-items:center; gap:7px;
+    border:1px solid var(--line); border-radius:99px; padding:6px 12px 6px 10px;
+    font-size:12px; font-weight:600; color:var(--mut); background:oklch(1 0 0/.02);
+  }
+  .pill i{ width:7px; height:7px; border-radius:50%; }
+  .pill b{ color:var(--ink); font-weight:800; margin-right:2px; }
+  .pill--ok i{ background:var(--ok); } .pill--warn i{ background:var(--warn); }
+  .pill--down i{ background:var(--down); } .pill--info i{ background:var(--info); }
+
+  /* ---------- ticker (signature element: newsroom wire) ---------- */
+  .wire{
+    border-bottom:1px solid var(--line);
+    background:oklch(0.10 0.01 250);
+    overflow:hidden; white-space:nowrap; position:relative;
+  }
+  .wire::before{
+    content:'LIVE WIRE'; position:relative; z-index:2; display:inline-block;
+    background:var(--red); color:oklch(0.98 0 0); font-size:10.5px; font-weight:800;
+    letter-spacing:.14em; padding:6px 12px; vertical-align:middle;
+  }
+  .wire__track{
+    display:inline-block; white-space:nowrap; vertical-align:middle;
+    animation:wire-scroll 38s linear infinite;
+    padding-left:100%;
+  }
+  .wire__track span{ display:inline-block; padding:0 22px; font-size:12px; color:var(--mut); vertical-align:middle; }
+  .wire__track span b{ color:var(--ink); font-weight:700; }
+  .wire__track span.wok{ color:var(--ok); } .wire__track span.wwarn{ color:var(--warn); } .wire__track span.wdown{ color:var(--down); }
+  .wire:hover .wire__track{ animation-play-state:paused; }
+  @keyframes wire-scroll{ from{ transform:translateX(0);} to{ transform:translateX(-100%);} }
+  @media (prefers-reduced-motion:reduce){ .wire__track{ animation:none; padding-left:0; } }
+
+  /* ---------- layout ---------- */
+  .wrap{ max-width:1180px; margin:0 auto; padding:26px clamp(16px,4vw,28px) 60px; }
+  .note{
+    font-size:12.5px; color:var(--mut); border:1px dashed var(--line-2); border-radius:12px;
+    padding:12px 14px; margin-bottom:22px; line-height:1.55;
+  }
+  .note b{ color:var(--ink); }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:18px; display:flex; flex-direction:column; gap:2px;
+  }
+  .card__head{ display:flex; align-items:center; gap:10px; padding-bottom:12px; margin-bottom:6px; border-bottom:1px solid var(--line); }
+  .card__ico{
+    width:30px; height:30px; border-radius:9px; display:grid; place-items:center; flex:none;
+    background:oklch(1 0 0/.05); font-size:15px;
+  }
+  .card__title{ font-size:14px; font-weight:800; letter-spacing:-.01em; }
+  .card__sub{ font-size:11px; color:var(--mut-2); margin-top:1px; }
+
+  .row{
+    display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:10px;
+    min-height:46px; padding:6px 4px; border-radius:10px; transition:background .15s;
+  }
+  .row:hover{ background:oklch(1 0 0/.035); }
+  .row + .row{ border-top:1px solid oklch(1 0 0/.05); }
+  .pip{ width:9px; height:9px; border-radius:50%; flex:none; background:var(--mut-2); transition:background .2s; }
+  .pip.ok{ background:var(--ok); box-shadow:0 0 8px color-mix(in oklch,var(--ok) 60%,transparent); }
+  .pip.warn{ background:var(--warn); }
+  .pip.down{ background:var(--down); }
+  .pip.info{ background:var(--info); }
+  .pip.pending{ background:var(--mut-2); animation:pulse-op 1.1s ease-in-out infinite; }
+  @keyframes pulse-op{ 0%,100%{opacity:.35;} 50%{opacity:1;} }
+
+  .row__main{ min-width:0; }
+  .row__name{ font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row__detail{ font-size:11px; color:var(--mut-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:1px; }
+  .row__ms{ font-size:11px; color:var(--mut); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .row__state{
+    font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+    padding:4px 9px; border-radius:99px; white-space:nowrap; text-align:center; min-width:78px;
+  }
+  .row__state.ok{ color:var(--ok); background:color-mix(in oklch,var(--ok) 15%,transparent); }
+  .row__state.warn{ color:var(--warn); background:color-mix(in oklch,var(--warn) 15%,transparent); }
+  .row__state.down{ color:var(--down); background:color-mix(in oklch,var(--down) 15%,transparent); }
+  .row__state.info{ color:var(--info); background:color-mix(in oklch,var(--info) 15%,transparent); }
+  .row__state.pending{ color:var(--mut); background:oklch(1 0 0/.06); }
+
+  .row__link{ font-size:10.5px; color:var(--mut-2); text-decoration:none; border-bottom:1px dotted var(--mut-2); flex:none; }
+  .row__link:hover{ color:var(--ink); border-color:var(--ink); }
+
+  .kv{ display:flex; justify-content:space-between; gap:12px; font-size:12px; padding:7px 4px; border-top:1px solid oklch(1 0 0/.05); }
+  .kv:first-of-type{ border-top:none; }
+  .kv span:first-child{ color:var(--mut); }
+  .kv span:last-child{ font-weight:600; }
+
+  .imgrow{ display:flex; align-items:center; gap:12px; padding:8px 4px; }
+  .imgrow img{ width:46px; height:46px; object-fit:contain; border-radius:8px; background:oklch(1 0 0/.05); border:1px solid var(--line); flex:none; }
+
+  footer{ text-align:center; font-size:11px; color:var(--mut-2); margin-top:34px; line-height:1.7; }
+  footer a{ color:var(--mut); }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead__inner">
+    <div class="masthead__row">
+      <div>
+        <div class="masthead__eyebrow">The Sun Malaysia · Web Operations</div>
+        <div class="masthead__title">Systems <em>Desk</em></div>
+      </div>
+      <div class="masthead__meta">
+        <div class="masthead__stamp">
+          Last checked <b id="lastChecked">—</b><br>
+          <span id="autoNote">Checks run live from your browser</span>
+        </div>
+        <button class="btn" id="recheckBtn" onclick="runAllChecks()">
+          <span class="btn__spin"></span><span>↻</span> Recheck all
+        </button>
+      </div>
+    </div>
+    <div class="summary" id="summary">
+      <span class="pill pill--ok"><i></i><b id="cntOk">0</b>operational</span>
+      <span class="pill pill--warn"><i></i><b id="cntWarn">0</b>unverified</span>
+      <span class="pill pill--down"><i></i><b id="cntDown">0</b>down</span>
+      <span class="pill pill--info"><i></i><b id="cntInfo">0</b>info</span>
+    </div>
+  </div>
+</header>
+
+<div class="wire"><div class="wire__track" id="wireTrack"><span>Running checks…</span></div></div>
+
+<main class="wrap">
+  <p class="note">
+    <b>How to read this:</b> checks that call external domains (WordPress REST API, YouTube, Instagram) run as live browser
+    requests. If a target doesn't send permissive CORS headers, the browser can still confirm it's <i>reachable</i> but
+    can't read the response — those show as <b>Unverified</b>, not <b>Down</b>. Every unverified row has an <b>Open ↗</b>
+    link so you can confirm by eye. Node/npm/build-tool rows are read from the repo's declared config, since a browser
+    page can't inspect your build server directly.
+  </p>
+
+  <div class="grid">
+
+    <!-- WordPress REST API -->
+    <section class="card" id="card-wp">
+      <div class="card__head">
+        <div class="card__ico">📰</div>
+        <div>
+          <div class="card__title">WordPress REST API</div>
+          <div class="card__sub">thesun.my/wp-json/wp/v2</div>
+        </div>
+      </div>
+      <div id="rows-wp"></div>
+    </section>
+
+    <!-- YouTube -->
+    <section class="card" id="card-yt">
+      <div class="card__head">
+        <div class="card__ico">▶️</div>
+        <div>
+          <div class="card__title">YouTube Data API v3</div>
+          <div class="card__sub">Channel UCJNLiW1NkgyHeoijxH-a_Wg</div>
+        </div>
+      </div>
+      <div id="rows-yt"></div>
+    </section>
+
+    <!-- Homepage / pages -->
+    <section class="card" id="card-pages">
+      <div class="card__head">
+        <div class="card__ico">🏠</div>
+        <div>
+          <div class="card__title">Site Pages</div>
+          <div class="card__sub">Homepage · Search · Mobile view</div>
+        </div>
+      </div>
+      <div id="rows-pages"></div>
+    </section>
+
+    <!-- Images -->
+    <section class="card" id="card-img">
+      <div class="card__head">
+        <div class="card__ico">🖼️</div>
+        <div>
+          <div class="card__title">Image Loading</div>
+          <div class="card__sub">Brand assets referenced in utils.js</div>
+        </div>
+      </div>
+      <div id="rows-img"></div>
+    </section>
+
+    <!-- Links -->
+    <section class="card" id="card-links">
+      <div class="card__head">
+        <div class="card__ico">🔗</div>
+        <div>
+          <div class="card__title">Navigation Links</div>
+          <div class="card__sub">MAIN_MENU — internal &amp; external</div>
+        </div>
+      </div>
+      <div id="rows-links"></div>
+    </section>
+
+    <!-- Social -->
+    <section class="card" id="card-social">
+      <div class="card__head">
+        <div class="card__ico">📣</div>
+        <div>
+          <div class="card__title">Social Channels</div>
+          <div class="card__sub">Reachability from the browser</div>
+        </div>
+      </div>
+      <div id="rows-social"></div>
+    </section>
+
+    <!-- Search & Tags -->
+    <section class="card" id="card-func">
+      <div class="card__head">
+        <div class="card__ico">🔍</div>
+        <div>
+          <div class="card__title">Search &amp; Tag Functions</div>
+          <div class="card__sub">Live query against WP REST</div>
+        </div>
+      </div>
+      <div id="rows-func"></div>
+    </section>
+
+    <!-- SEO -->
+    <section class="card" id="card-seo">
+      <div class="card__head">
+        <div class="card__ico">🏷️</div>
+        <div>
+          <div class="card__title">SEO Snapshot</div>
+          <div class="card__sub">useSeo.js contract vs. live &lt;head&gt;</div>
+        </div>
+      </div>
+      <div id="rows-seo"></div>
+    </section>
+
+    <!-- Build environment (static / informational) -->
+    <section class="card" id="card-build">
+      <div class="card__head">
+        <div class="card__ico">🛠️</div>
+        <div>
+          <div class="card__title">Build Environment</div>
+          <div class="card__sub">Declared in package.json / vite.config.js</div>
+        </div>
+      </div>
+      <div class="kv"><span>Node engine (Vite 6)</span><span>≥ 18.x required</span></div>
+      <div class="kv"><span>Package manager</span><span>yarn 1.22.22</span></div>
+      <div class="kv"><span>React</span><span>18.3.1</span></div>
+      <div class="kv"><span>React Router</span><span>7.1.5</span></div>
+      <div class="kv"><span>Vite</span><span>6.0.7</span></div>
+      <div class="kv"><span>Tailwind CSS</span><span>3.4.1</span></div>
+      <div class="kv"><span>SWR</span><span>2.3.8</span></div>
+      <div class="kv"><span>Dev server</span><span>0.0.0.0:3000</span></div>
+    </section>
+
+  </div>
+
+  <footer>
+    Static informational rows (ⓘ) are read from repo config, not live-probed.<br>
+    “Unverified” means the request was blocked by the browser's CORS policy — it is not evidence of an outage.
+  </footer>
+</main>
+
+<script>
+const WP_BASE = 'https://thesun.my/wp-json/wp/v2';
+const SITE_ORIGIN = 'https://thesun.my';
+const YT_API_BASE = 'https://www.googleapis.com/youtube/v3';
+const YT_CHANNEL_ID = 'UCJNLiW1NkgyHeoijxH-a_Wg';
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_3108d35f-a45a-4c79-ae5b-d6401293d73f/artifacts/j5qi0lcz_350x180-no-outline.png';
+const FALLBACK_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9" width="800" height="450"><rect width="16" height="9" fill="%23e5e7eb"/><text x="50%25" y="55%25" text-anchor="middle" font-family="Arial" font-size="1" fill="%2399a">The Sun Malaysia</text></svg>';
+
+const MENU_LINKS = [
+  { label:'Home', href:'/', kind:'internal' },
+  { label:'Malaysia', href:'/category/malaysia-news', kind:'internal' },
+  { label:'World', href:'/category/world-news', kind:'internal' },
+  { label:'Business', href:'/category/business', kind:'internal' },
+  { label:'Lifestyle', href:'/category/lifestyle', kind:'internal' },
+  { label:'Sports', href:'/category/sports', kind:'internal' },
+  { label:'Videos', href:'/category/videos', kind:'internal' },
+  { label:'Classifieds', href:'https://sunmedia.my', kind:'external' },
+];
+
+const wireItems = [];
+const counts = { ok:0, warn:0, down:0, info:0 };
+
+function rowHTML(id, name, detailInitial){
+  return `<div class="row" id="${id}">
+    <span class="pip pending"></span>
+    <div class="row__main">
+      <div class="row__name">${name}</div>
+      <div class="row__detail">${detailInitial || 'queued…'}</div>
+    </div>
+    <span class="row__ms"></span>
+    <span class="row__state pending">checking</span>
+  </div>`;
+}
+
+function setRow(id, {status, detail, ms, link}){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const pip = el.querySelector('.pip');
+  const state = el.querySelector('.row__state');
+  const det = el.querySelector('.row__detail');
+  const msEl = el.querySelector('.row__ms');
+
+  pip.className = 'pip ' + status;
+  state.className = 'row__state ' + status;
+  const labels = { ok:'Operational', warn:'Unverified', down:'Down', info:'Info', pending:'Checking' };
+  state.textContent = labels[status] || status;
+  if(detail) det.textContent = detail;
+  if(ms !== undefined) msEl.textContent = ms;
+
+  if(link){
+    let a = el.querySelector('.row__link');
+    if(!a){
+      a = document.createElement('a');
+      a.className = 'row__link';
+      a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.textContent = 'Open ↗';
+      el.insertBefore(a, state);
+    }
+    a.href = link;
+  }
+
+  counts[status] = (counts[status] || 0) + 1;
+  const nameText = el.querySelector('.row__name').textContent;
+  wireItems.push({ status, text: `${nameText}: ${labels[status]}${detail ? ' — ' + detail : ''}` });
+}
+
+function updateSummary(){
+  document.getElementById('cntOk').textContent = counts.ok || 0;
+  document.getElementById('cntWarn').textContent = counts.warn || 0;
+  document.getElementById('cntDown').textContent = counts.down || 0;
+  document.getElementById('cntInfo').textContent = counts.info || 0;
+}
+
+function updateWire(){
+  const track = document.getElementById('wireTrack');
+  if(!wireItems.length){ track.innerHTML = '<span>No checks completed yet…</span>'; return; }
+  const cls = { ok:'wok', warn:'wwarn', down:'wdown', info:'' };
+  track.innerHTML = wireItems.map(w => `<span class="${cls[w.status]||''}">${w.text}</span>`).join('  •  ') +
+                     '  •  ' + wireItems.map(w => `<span class="${cls[w.status]||''}">${w.text}</span>`).join('  •  ');
+}
+
+function timedFetch(url, opts = {}, timeoutMs = 8000){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  const started = performance.now();
+  return fetch(url, { ...opts, signal: ctrl.signal })
+    .then(res => ({ res, ms: Math.round(performance.now() - started) }))
+    .finally(() => clearTimeout(t));
+}
+
+function loadImage(url, timeoutMs = 8000){
+  return new Promise((resolve) => {
+    const started = performance.now();
+    const img = new Image();
+    const timer = setTimeout(() => resolve({ ok:false, ms: Math.round(performance.now()-started), reason:'timeout' }), timeoutMs);
+    img.onload = () => { clearTimeout(timer); resolve({ ok:true, ms: Math.round(performance.now()-started), w: img.naturalWidth, h: img.naturalHeight }); };
+    img.onerror = () => { clearTimeout(timer); resolve({ ok:false, ms: Math.round(performance.now()-started), reason:'error' }); };
+    img.src = url;
+  });
+}
+
+async function checkGetEndpoint(rowId, url, label){
+  try{
+    const { res, ms } = await timedFetch(url, { mode:'cors' });
+    if(res.ok){
+      let extra = '';
+      try{
+        const total = res.headers.get('x-wp-total');
+        extra = total ? `x-wp-total: ${total}` : `HTTP ${res.status}`;
+      }catch(e){ extra = `HTTP ${res.status}`; }
+      setRow(rowId, { status:'ok', detail: extra, ms: ms + ' ms', link: url });
+    } else {
+      setRow(rowId, { status:'down', detail:`HTTP ${res.status}`, ms: ms + ' ms', link: url });
+    }
+  }catch(err){
+    const reason = err.name === 'AbortError' ? 'timed out (8s)' : 'blocked by CORS / network';
+    setRow(rowId, { status:'warn', detail: reason, ms:'—', link: url });
+  }
+}
+
+async function checkNoCorsReachable(rowId, url){
+  try{
+    const { ms } = await timedFetch(url, { mode:'no-cors' });
+    setRow(rowId, { status:'warn', detail:'reachable, status opaque (no-cors)', ms: ms + ' ms', link: url });
+  }catch(err){
+    const reason = err.name === 'AbortError' ? 'timed out (8s)' : 'unreachable';
+    setRow(rowId, { status:'down', detail: reason, ms:'—', link: url });
+  }
+}
+
+async function checkImageRow(rowId, url){
+  const result = await loadImage(url);
+  const el = document.getElementById(rowId);
+  if(result.ok){
+    setRow(rowId, { status:'ok', detail: result.w ? `${result.w}×${result.h}px` : 'loaded', ms: result.ms + ' ms', link: url.startsWith('data:') ? undefined : url });
+  } else {
+    setRow(rowId, { status:'down', detail: result.reason, ms: result.ms + ' ms', link: url.startsWith('data:') ? undefined : url });
+  }
+}
+
+function markInfo(rowId, detail){
+  setRow(rowId, { status:'info', detail, ms:'' });
+}
+
+async function runAllChecks(){
+  const btn = document.getElementById('recheckBtn');
+  btn.classList.add('is-loading'); btn.disabled = true;
+  counts.ok = counts.warn = counts.down = counts.info = 0;
+  wireItems.length = 0;
+
+  // ---- WordPress REST API card ----
+  document.getElementById('rows-wp').innerHTML = [
+    rowHTML('wp-posts', 'Posts endpoint', '/posts?per_page=1'),
+    rowHTML('wp-cats', 'Categories endpoint', '/categories'),
+    rowHTML('wp-tags', 'Tags endpoint (hashtags)', '/tags?orderby=count'),
+    rowHTML('wp-embed', 'Embedded media (_embed)', '/posts?_embed=1&per_page=1'),
+  ].join('');
+
+  // ---- YouTube card ----
+  document.getElementById('rows-yt').innerHTML = [
+    rowHTML('yt-channel', 'Channels endpoint', 'contentDetails lookup'),
+    rowHTML('yt-key', 'API key (YOUTUBE_API_KEY)', 'runtime env var'),
+  ].join('');
+
+  // ---- Pages card ----
+  document.getElementById('rows-pages').innerHTML = [
+    rowHTML('pg-home', 'Homepage', SITE_ORIGIN + '/'),
+    rowHTML('pg-search', 'Search function', '/posts?search=malaysia'),
+    rowHTML('pg-mobile', 'Mobile / responsive view', 'viewport check'),
+  ].join('');
+
+  // ---- Images card ----
+  document.getElementById('rows-img').innerHTML = [
+    rowHTML('img-logo', 'Site logo', 'customer-assets.emergentagent.com'),
+    rowHTML('img-fallback', 'Fallback placeholder (inline SVG)', 'data: URI'),
+  ].join('');
+
+  // ---- Links card ----
+  document.getElementById('rows-links').innerHTML = MENU_LINKS.map((l, i) =>
+    rowHTML('link-' + i, l.label, l.kind === 'external' ? l.href : 'internal route')
+  ).join('');
+
+  // ---- Social card ----
+  document.getElementById('rows-social').innerHTML = [
+    rowHTML('soc-ig', 'Instagram — @thesundaily', 'instagram.com'),
+    rowHTML('soc-yt', 'YouTube channel page', 'youtube.com/channel/…'),
+  ].join('');
+
+  // ---- Search & Tags function card ----
+  document.getElementById('rows-func').innerHTML = [
+    rowHTML('fn-search', 'Search query ("malaysia")', 'live WP query'),
+    rowHTML('fn-tags', 'Trending hashtag sort', 'orderby=count'),
+  ].join('');
+
+  // ---- SEO card ----
+  document.getElementById('rows-seo').innerHTML = [
+    rowHTML('seo-title', 'Document &lt;title&gt; suffix rule', '"| The Sun Malaysia" appended'),
+    rowHTML('seo-og', 'Open Graph tags (useSeo.js)', 'title, description, image, url'),
+    rowHTML('seo-canonical', 'Canonical link handling', 'set + cleaned up on unmount'),
+    rowHTML('seo-jsonld', 'JSON-LD structured data', 'optional, per-page'),
+    rowHTML('seo-live', 'Live homepage &lt;head&gt; fetch', SITE_ORIGIN),
+  ].join('');
+
+  const jobs = [];
+
+  // WP checks
+  jobs.push(checkGetEndpoint('wp-posts', `${WP_BASE}/posts?per_page=1`));
+  jobs.push(checkGetEndpoint('wp-cats', `${WP_BASE}/categories`));
+  jobs.push(checkGetEndpoint('wp-tags', `${WP_BASE}/tags?orderby=count&order=desc&hide_empty=1`));
+  jobs.push(checkGetEndpoint('wp-embed', `${WP_BASE}/posts?_embed=1&per_page=1`));
+
+  // YouTube — no key available client-side here, so we test raw reachability;
+  // a 400 (missing key) still proves the endpoint itself is up.
+  jobs.push((async () => {
+    try{
+      const { res, ms } = await timedFetch(`${YT_API_BASE}/channels?part=contentDetails&id=${YT_CHANNEL_ID}`, { mode:'cors' });
+      if(res.status === 400 || res.status === 403){
+        setRow('yt-channel', { status:'ok', detail:`endpoint reachable (HTTP ${res.status}, key required)`, ms: ms+' ms', link: `${YT_API_BASE}/channels?part=contentDetails&id=${YT_CHANNEL_ID}` });
+      } else if(res.ok){
+        setRow('yt-channel', { status:'ok', detail:`HTTP ${res.status}`, ms: ms+' ms' });
+      } else {
+        setRow('yt-channel', { status:'down', detail:`HTTP ${res.status}`, ms: ms+' ms' });
+      }
+    }catch(err){
+      setRow('yt-channel', { status:'warn', detail: err.name === 'AbortError' ? 'timed out' : 'blocked by CORS / network', ms:'—' });
+    }
+  })());
+  jobs.push((async () => { markInfo('yt-key', 'Not readable from a static page — verify YOUTUBE_API_KEY is set in the deploy environment'); })());
+
+  // Pages
+  jobs.push(checkNoCorsReachable('pg-home', SITE_ORIGIN + '/'));
+  jobs.push(checkGetEndpoint('pg-search', `${WP_BASE}/posts?search=malaysia&per_page=1`));
+  jobs.push((async () => {
+    const w = window.innerWidth;
+    const bp = w < 480 ? 'mobile (<480px)' : w < 1024 ? 'tablet' : 'desktop';
+    markInfo('pg-mobile', `viewport ${w}px → ${bp} layout active`);
+  })());
+
+  // Images
+  jobs.push(checkImageRow('img-logo', LOGO_URL));
+  jobs.push(checkImageRow('img-fallback', FALLBACK_IMAGE));
+
+  // Links
+  MENU_LINKS.forEach((l, i) => {
+    if(l.kind === 'external'){
+      jobs.push(checkNoCorsReachable('link-' + i, l.href));
+    } else {
+      jobs.push((async () => markInfo('link-' + i, 'client-side route — verify after deploy, not fetchable standalone'))());
+    }
+  });
+
+  // Search & tags function
+  jobs.push(checkGetEndpoint('fn-search', `${WP_BASE}/posts?search=malaysia&per_page=3`));
+  jobs.push(checkGetEndpoint('fn-tags', `${WP_BASE}/tags?orderby=count&order=desc&hide_empty=1&per_page=5`));
+
+  // SEO — static contract rows
+  jobs.push((async () => markInfo('seo-title', 'Confirmed in useSeo.js: appends "| The Sun Malaysia" unless already present'))());
+  jobs.push((async () => markInfo('seo-og', 'Confirmed in useSeo.js: writes og:title/description/type/image/url + twitter card'))());
+  jobs.push((async () => markInfo('seo-canonical', 'Confirmed in useSeo.js: canonical link created/updated, removed on unmount'))());
+  jobs.push((async () => markInfo('seo-jsonld', 'Confirmed in useSeo.js: injects <script type="application/ld+json"> only when jsonLd is passed'))());
+  jobs.push((async () => {
+    try{
+      const { res, ms } = await timedFetch(SITE_ORIGIN + '/', { mode:'cors' });
+      if(res.ok){
+        const html = await res.text();
+        const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+        setRow('seo-live', { status:'ok', detail: titleMatch ? `title: "${titleMatch[1].slice(0,40)}"` : `HTTP ${res.status}`, ms: ms+' ms', link: SITE_ORIGIN });
+      } else {
+        setRow('seo-live', { status:'down', detail:`HTTP ${res.status}`, ms: ms+' ms', link: SITE_ORIGIN });
+      }
+    }catch(err){
+      setRow('seo-live', { status:'warn', detail:'blocked by CORS — open the link to inspect manually', ms:'—', link: SITE_ORIGIN });
+    }
+  })());
+
+  // Social
+  jobs.push(checkNoCorsReachable('soc-ig', 'https://www.instagram.com/thesundaily/'));
+  jobs.push(checkNoCorsReachable('soc-yt', `https://www.youtube.com/channel/${YT_CHANNEL_ID}`));
+
+  await Promise.allSettled(jobs);
+
+  updateSummary();
+  updateWire();
+  document.getElementById('lastChecked').textContent = new Date().toLocaleTimeString();
+  btn.classList.remove('is-loading'); btn.disabled = false;
+}
+
+runAllChecks();
+</script>
+</body>
+</html>

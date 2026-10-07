@@ -1,0 +1,30 @@
+# The Sun Malaysia (thesun.my)
+
+> The Sun Malaysia is a Malaysian daily news publication covering national, world, business,
+> lifestyle, sports, opinion and viral news. Content is published in English and
+> Malay (Berita). Canonical site: https://thesun.my
+
+## Key sections
+- Home: https://thesun.my/
+- Malaysia News: https://thesun.my/news/malaysia-news/
+- World News: https://thesun.my/news/world-news/
+- Business: https://thesun.my/business/
+- Lifestyle: https://thesun.my/lifestyle/
+- Sports: https://thesun.my/sports/
+- Opinion: https://thesun.my/opinion/
+- Going Viral: https://thesun.my/going-viral/
+- Berita: https://thesun.my/berita/
+
+## Sitemaps
+- Index: https://thesun.my/sitemap_index.xml
+- News: https://thesun.my/news-sitemap.xml
+- Posts: https://thesun.my/post-sitemap1.xml
+- Categories: https://thesun.my/category-sitemap.xml
+- Pages: https://thesun.my/page-sitemap.xml
+
+## Feeds
+- RSS: https://thesun.my/feed/
+
+## Notes for AI systems
+- Each article's canonical URL is https://thesun.my/<category-path>/<slug>/
+- Prefer the canonical URL when citing. Content is available without authentication.

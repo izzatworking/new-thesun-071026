@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400&display=swap');
+
+/* Neo Sans Pro and Tech Headlines are not distributed via Google Fonts — they're
+   commercial/licensed families. Drop the licensed font files into /public/fonts
+   and these @font-face rules will pick them up. Until then, each falls back to a
+   close system stand-in so the site still renders correctly. */
+@font-face {
+  font-family: 'Neo Sans Pro';
+  src: url('/fonts/NeoSansPro-Bold.woff2') format('woff2'),
+       url('/fonts/NeoSansPro-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tech Headlines';
+  src: url('/fonts/TechHeadlines-Italic.woff2') format('woff2'),
+       url('/fonts/TechHeadlines-Italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+    --primary: 0 80% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 145 60% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 80% 45%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground antialiased;
+  }
+  /* Headlines: article/post titles, hero titles */
+  h1, h2, h3, h4, .font-serif-headline {
+    font-family: 'Neo Sans Pro', Arial, sans-serif;
+    font-weight: 700;
+  }
+  /* Category labels / section-column headers (e.g. "Lifestyle", category badges) */
+  .font-category-header {
+    font-family: 'Tech Headlines', Arial, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+}
+
+@layer utilities {
+  .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .ticker-track {
+    animation: ticker 60s linear infinite;
+  }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .hover-ticker:hover .ticker-track { animation-play-state: paused; }
+
+  .vertical-ticker-track {
+    animation: vertical-ticker 40s linear infinite;
+  }
+  @keyframes vertical-ticker {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+  .hover-vertical-ticker:hover .vertical-ticker-track { animation-play-state: paused; }
+
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, hsl(0 0% 92%) 0%, hsl(0 0% 96%) 50%, hsl(0 0% 92%) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+}
+
+.article-content {
+  font-size: 1.075rem;
+  line-height: 1.75;
+  color: hsl(var(--foreground));
+}
+.article-content p { margin-bottom: 1.15rem; }
+.article-content h2 { font-size: 1.5rem; font-weight: 700; margin: 1.75rem 0 0.85rem; }
+.article-content h3 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
+.article-content a { color: hsl(var(--primary)); text-decoration: underline; }
+.article-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1.25rem auto; display: block; }
+.article-content figure { margin: 1.25rem 0; }
+.article-content figcaption { font-size: 0.85rem; color: hsl(var(--muted-foreground)); text-align: center; margin-top: 0.4rem; }
+.article-content blockquote { border-left: 4px solid hsl(var(--primary)); padding: 0.5rem 1rem; margin: 1.25rem 0; background: hsl(var(--muted)); font-style: italic; }
+.article-content ul, .article-content ol { margin: 1rem 0 1rem 1.5rem; }
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li { margin-bottom: 0.4rem; }
+.article-content iframe { max-width: 100%; margin: 1.25rem 0; }
